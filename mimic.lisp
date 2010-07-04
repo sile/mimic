@@ -92,7 +92,7 @@
 		       #1=(gethash (f-key ft) (svm-words svm))
     (when (and (not exists?)
 	       create-if-not-exists)
-      (setf val (setf #1# (init-feature (f-surface ft) (f-type ft)))))
+      (setf val (setf #1# (init-feature (f-surface ft) (f-type ft) 0.0))))
     val))
 
 (defun get-last-update (ft svm &optional create-if-not-exists)
@@ -152,8 +152,11 @@
     (incf example-n)))
 
 ;;;;;;;;;;;
-(let ((svm (make-svm)))
-  (each-sentence (sentence "kokoro.corpus")
+(let ((svm (make-svm))
+      (cnt 0))
+  (each-sentence (sentence "okw.corpus") ;"kokoro.corpus")
+    (when (zerop (mod (incf cnt) 10000))
+      (print cnt))
     (train-sentence svm sentence))
   (defparameter *svm* svm))
 
@@ -163,11 +166,6 @@
   (loop WITH prev = 0
 	FOR i FROM 1 BELOW (length line)
 	FOR fv = (generate-fv line i)
-    DO
-    (print (s "=="i"=="))
-    (print (mapcar (lm (get-word $ svm)) fv))
-    (print (svm.dotproduct svm fv))
-    
     WHEN (>= (svm.dotproduct svm fv) 0.0)
     COLLECT (prog1 (subseq line prev i)
 	      (setf prev i)) INTO words
@@ -182,37 +180,6 @@
 	      (f-surface f) #\Tab
 	      (round (* (f-score f) 100000)))))
   'done)
+  
+;; C++での分割部分は、templateを用いるようにすれば、メモリ管理関連をユーザに任せることが可能となる
 
-#|
-namespace std {
-  namespace tr1 {
-    
-    template<class T>
-    struct hash {
-    };
-    
-    template <>
-    struct hash<feature> : public std::unary_function<feature, std::size_t>
-    {
-      size_t
-      operator()(feature val) const
-      {
-	size_t __length = val.len_;
-	const char *__first = val.str_;
-	
-	size_t __result = static_cast<size_t>(2166136261UL);
-	__result ^= static_cast<size_t>(val.ftype_);
-	//    __result += static_cast<size_t>(val.ftype_ << 8);
-	__result *= static_cast<size_t>(16777619UL);
-	
-	for (; __length > 0; --__length)
-	  {
-	    __result ^= static_cast<size_t>(*__first++);
-	    __result *= static_cast<size_t>(16777619UL);
-	  }
-	return __result;
-      }
-    };
-  }
-}
-|#
