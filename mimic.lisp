@@ -183,3 +183,36 @@
 	      (round (* (f-score f) 100000)))))
   'done)
 
+#|
+namespace std {
+  namespace tr1 {
+    
+    template<class T>
+    struct hash {
+    };
+    
+    template <>
+    struct hash<feature> : public std::unary_function<feature, std::size_t>
+    {
+      size_t
+      operator()(feature val) const
+      {
+	size_t __length = val.len_;
+	const char *__first = val.str_;
+	
+	size_t __result = static_cast<size_t>(2166136261UL);
+	__result ^= static_cast<size_t>(val.ftype_);
+	//    __result += static_cast<size_t>(val.ftype_ << 8);
+	__result *= static_cast<size_t>(16777619UL);
+	
+	for (; __length > 0; --__length)
+	  {
+	    __result ^= static_cast<size_t>(*__first++);
+	    __result *= static_cast<size_t>(16777619UL);
+	  }
+	return __result;
+      }
+    };
+  }
+}
+|#
