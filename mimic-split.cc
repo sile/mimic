@@ -146,7 +146,8 @@ int main(int argc, char** argv) {
     if(line_len != 0) {
       const char* line2 = line;
       char prev_type = char_type(line2);
-      while(*line2 != '\0') {
+      while(line < line2 && line2 < line+line_len) {
+	//	std::cerr << (int)line2 << std::endl;
 	unsigned pos = line2-line;
 	char type = char_type(line2);
 	cut_score[pos] = da.char_type_link_score(prev_type, type);
