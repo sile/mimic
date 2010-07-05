@@ -1,0 +1,32 @@
+【使い方】
+==============================
+[common lisp]
+
+・モデル作成
+--
+$ cd mimic
+$ sbcl
+> (load "mimic")
+> (mimic:train-file "/path/to/learn-data")
+--
+
+・分割(common lisp)
+--
+> (defvar *svm* (mimic:train-file "/path/to/learn-data"))
+> (mimic:split *svm* "text")
+--
+
+・C++用にモデルを保存
+--
+> (mimic:dump-model *svm* "model-file")
+
+
+==============================
+[C++]
+・DoubleArrayインデックス作成
+$ g++ -O2 -o mkmimic mkmimic.cc
+$ ./mkmimic index model-file
+
+・分割(C++)
+$ g++ -O2 -o mimic-split mimic-split.cc
+$ ./mimic-split index text-file
