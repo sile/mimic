@@ -12,7 +12,7 @@
 $ cd mimic
 $ sbcl
 > (load "mimic")
-> (mimic:train-file "/path/to/learn-data")
+> (mimic:train-file "/path/to/learn-data")  ; learn-dataの形式はMicterと同様
 --
 
 ・分割(common lisp)
