@@ -66,10 +66,9 @@
   (declare #.*fastest*
 	   (simple-string text)
 	   (fixnum center))
-  (when (and (< center (length text))
-	     (plusp center))
+  (when (< 1 center (length text))
     (list 
-     (make-feature :surface (subseq text (max 0 (- center 2)) (1+ center))
+     (make-feature :surface (subseq text (- center 2) (1+ center))
 		   :type 5))))
 
 (defun generate-type-bigram-fv (text center)
@@ -200,10 +199,14 @@
 (defun train-file (filepath)
   (let ((svm (make-svm))
 	(cnt 0))
-    (each-sentence (sentence filepath)
-      (when (zerop (mod (incf cnt) 10000))
-	(format *error-output* "; ~A~%" cnt))
-      (train svm sentence))
+    (handler-bind (#+SBCL (sb-int:stream-decoding-error
+                            (lambda (c)
+                              (declare (ignore c))
+                              (invoke-restart 'sb-impl::input-replacement #\?))))
+      (each-sentence (sentence filepath)
+        (when (zerop (mod (incf cnt) 10000))
+	  (format *error-output* "; ~A~%" cnt))
+        (train svm sentence)))
     svm))
 
 ;;;;;;;;
